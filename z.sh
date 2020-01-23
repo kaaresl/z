@@ -58,7 +58,13 @@ _z() {
         # don't track excluded directory trees
         local exclude
         for exclude in "${_Z_EXCLUDE_DIRS[@]}"; do
-            case "$*" in "$exclude*") return;; esac
+            if [[ -n "$ZSH_VERSION" ]]; then
+                [[ "$*" == ${~exclude} ]] && return
+            elif [[ -n "$BASH_VERSION" ]]; then
+                $(eval [[ "$*" == "$exclude" ]]) && return
+            else
+                case "$*" in "$exclude") return;; esac
+            fi
         done
 
         # maintain the data file
