@@ -14,6 +14,7 @@
 #         set $_Z_NO_RESOLVE_SYMLINKS to prevent symlink resolution.
 #         set $_Z_NO_PROMPT_COMMAND if you're handling PROMPT_COMMAND yourself.
 #         set $_Z_EXCLUDE_DIRS to an array of directories to exclude.
+#         set $_Z_EXCLUDE_REGEX_DIRS to an array of regular expressions to exclude.
 #         set $_Z_OWNER to your username if you want use z while sudo with $HOME kept
 #
 # USE:
@@ -58,13 +59,11 @@ _z() {
         # don't track excluded directory trees
         local exclude
         for exclude in "${_Z_EXCLUDE_DIRS[@]}"; do
-            if [[ -n "$ZSH_VERSION" ]]; then
-                [[ "$*" == ${~exclude} ]] && return
-            elif [[ -n "$BASH_VERSION" ]]; then
-                $(eval [[ "$*" == "$exclude" ]]) && return
-            else
-                case "$*" in "$exclude") return;; esac
-            fi
+            case "$*" in "$exclude*") return;; esac
+        done
+
+        for exclude in "${_Z_EXCLUDE_REGEX_DIRS[@]}"; do
+            [[ $* =~ $exclude ]] && return
         done
 
         # maintain the data file
